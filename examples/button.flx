@@ -1,0 +1,35 @@
+//$ Button Example
+//$ Demonstrate callback and buttons
+include "FLTK/fltk";
+open Fl;
+open Fl_Window;
+open Fl_Widget;
+open Fl_Button;
+
+//$ Callbacks are simple, just define with cproc or cfun
+//$ Make sure it matches your C callback signature and
+//$ your good to go
+cproc click_cb(widget:fl_widget, data:address) {
+  println$ "Click";
+}
+
+cproc clack_cb(widget:fl_widget, data:address) {
+  println$ "Clack";
+}
+
+//$ Create our form
+val window = fl_window(200,60,"Hi"); 
+val click_m = "&Click";
+val click_b = fl_button(20,20,80,25, click_m);
+val clack_m = "C&lack";
+val clack_b =  fl_button(100,20,80,25, clack_m);
+
+//$ Pass in our callback just like in the C++ API...
+set_callback(click_b,click_cb,NULL);
+set_callback(clack_b,clack_cb,NULL);
+
+show(window);
+end(window);
+run(); 
+
+

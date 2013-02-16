@@ -1,0 +1,149 @@
+//$ GL Overlay
+//$ Demonstration of Fl_Gl_Window and using FLTK binding together
+//$ with the Open GL binding. Demonstrates use of proxied FLTK classes
+//$ 
+//$Load the necessary libs and pull in classes to environment
+include "FLTK/fltk_gl";
+include "FLTK/fltk";
+include "GL/gl_lib";
+open GL_gl_h;
+open Fl;
+open Fl_Window;
+//open Fl_Window[fl_gl_window];
+//open Fl_Window[fl_gl_window_proxy];
+open Fl_Widget;
+open Fl_Button;
+open Fl_Toggle_Button;
+open Fl_Hor_Slider;
+open Fl_Math;
+open Fl_Gl_Window_Proxy;
+open Fl_Valuator;
+
+// Container for GL window and data
+struct shape_window {
+  window:fl_gl_window_proxy;
+  sides:int;
+  overlay_sides:int;
+}
+
+//$ Rendering function for the shape
+//$ this function will be called FL_Gl_Window_Proxy
+//$ when the shape need to be redrawn (like when you move the shape slider)
+//$ my_sw_address is a pointer to a shape_window struct set when
+//$ set_draw_callback_proxy
+proc draw_shape(my_sw_ptr:address) { 
+  var my_sw = *cast[&shape_window](my_sw_ptr);
+  if (not get_valid(my_sw.window) == 0t) do
+    valid(my_sw.window,1t);
+    glLoadIdentity();
+    glViewport(0,0,w(my_sw.window),h(my_sw.window));
+  done
+  // draw an amazing but slow graphic:
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBegin(GL_POLYGON);
+  for var j in 0 upto my_sw.sides do 
+    var ang = double(j)*double(2.0)*M_PI/double(my_sw.sides);
+    glColor3f(float(j)/float(my_sw.sides),float(j)/float(my_sw.sides),float(j)/float(my_sw.sides));
+    glVertex3f(float(cos(ang)),float(sin(ang)),0.0f);
+  done
+  glEnd();
+}
+
+//$ Rendering function for the overlay
+//$ this function will be called FL_Gl_Window_Proxy
+//$ when the overlay need to be redrawn (like when you move the shape slider). 
+proc draw_overlay(my_sw_ptr:address) {
+  var my_sw = *cast[&shape_window](my_sw_ptr);
+  // the valid() property may be used to avoid reinitializing your
+  // GL transformation for each redraw:
+  //var window = cast[fl_gl_window](this);
+  if (not get_valid(my_sw.window) == 0t) do
+    valid(my_sw.window,1t);
+    glLoadIdentity();
+    glViewport(0,0,w(my_sw.window),h(my_sw.window));
+  done
+  // draw an amazing graphic:
+  gl_color(FL_RED);
+  glBegin(GL_LINE_LOOP);
+  for var j in 0 upto my_sw.overlay_sides do
+    var ang = double(j)*double(2.0)*M_PI/double(my_sw.overlay_sides);
+    glVertex3f(float(cos(ang)),float(sin(ang)),0.0f);
+  done
+  glEnd();
+}
+
+fun handle(my_ptr:address,e:int) = {
+  var my_sw = *cast[&shape_window](my_ptr);
+  match e with
+  |_ when to_int(FL_ENTER) == e => {cursor(cast[fl_window](sw.window),FL_CURSOR_CROSS);}
+  |_ when to_int(FL_LEAVE) == e => {cursor(cast[fl_window](sw.window),FL_CURSOR_DEFAULT);}
+  |_  => {}
+  endmatch;
+  return e; 
+}
+
+
+//$ Callback for the shape slider. Updates the sides field in the shape_window
+//$ struct and redraws the shape
+proc sides_cb(o:fl_widget) {
+  sw.sides = int(value(cast[fl_slider](o)));
+  redraw(sw.window);
+}
+
+//$ Callback for the overlay slider. Updates the sides field in the shape_window
+//$ struct and redraws the shape
+proc overlay_sides_cb(o:fl_widget) {
+  sw.overlay_sides = int(value(cast[fl_slider](o)));
+  redraw_overlay(sw.window);
+}
+ 
+//$ Create main window
+var window = fl_window(300, 370,"");
+//$ Create the shape_window struct and initialized GL window
+var sw = shape_window(fl_gl_window_proxy(10, 75, w(window)-20, h(window)-90),3,3);
+resizable(window,sw.window);
+//$ Since this is not C++ we can not extend the class FL_GL_Window.
+//$ Instead we use a class Fl_Gl_Window_Proxy to extend it for us. 
+//$ we will supply a callback which will be called by the
+//$ implementations of FL_GL_Window's virtual functions.
+//$ In this case the felix procedure draw_shape will be called when
+//$ C++ draw method is called.
+//$
+//$ Arguments are mostly boiler plate. 
+//$ instance of class,callback wrapper,felix callback proc, pointer to 
+//$ container object or class instance. (This allows call back to have
+//$ access to the instance it belongs to and associated data)
+set_draw_callback(sw.window,cast[c_handler2_t](fl_callback_proxy2),draw_shape,&sw);
+
+set_handle_callback(sw.window,cast[c_handler3_t](fl_callback_proxy3),handle,&sw);
+
+//$ Here the felix procedure draw_overlay will be called when
+//$ draw method is called
+set_draw_overlay_callback(sw.window,cast[c_handler2_t](fl_callback_proxy2),draw_overlay,&sw);
+
+//$ Create the slider control, set parameters and callback
+var slider=  fl_hor_slider(60, 5, w(window)-70, 30, "Sides:");
+align(slider,FL_ALIGN_LEFT);
+//$ The funky line below is actually the magic that allows the callback
+//$ procedure to be wraped in the current thread frame so the
+//$ callback procedure can acces values in it.
+set_callback(slider,cast[Fl_Callback](fl_callback_cb),sides_cb);
+ignore(value(slider,double(sw.sides)));
+step(slider,1);
+bounds(slider,double(3.0),double(40.0));
+//$ Create the slider control and set parameters and callback
+var oslider = fl_hor_slider(60, 40, w(window)-70, 30, "Overlay:");
+align(oslider,FL_ALIGN_LEFT);
+set_callback(oslider,cast[Fl_Callback](fl_callback_cb),overlay_sides_cb);
+ignore(value(oslider,double(sw.overlay_sides)));
+step(oslider,1);
+bounds(oslider,double(3.0),double(40.0));
+//$ Bind and display the main window
+end(window);
+show(window);
+//$ Bind and display the GL window
+end(cast[fl_window](sw.window));
+show(sw.window);
+run(); 
+
+

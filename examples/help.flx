@@ -1,0 +1,19 @@
+//$ Help Dialog Example
+
+include "FLTK/fltk";
+open Fl;
+open Fl_Help_Dialog;
+
+val help = fl_help_dialog();
+var doc = Filename::join(Filename::join(#Config::config.FLX_INSTALL_DIR,"web"),"download.html");
+
+if System::argc < 2 do
+  load(help,doc);
+else
+  Fl_Help_Dialog::load(help,System::argv(1));
+done
+show(help);
+run();
+delete(help);
+
+

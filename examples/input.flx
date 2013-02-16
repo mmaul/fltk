@@ -1,0 +1,93 @@
+//$ input.flx
+//$ Demonstrates text input widgets
+//$ WHen event qualifier
+
+include "FLTK/fltk";
+open Bits;
+open C_hack;
+//$ Notice that you will have a open ofr each FLTK class you need to expose
+//$ Also notice that constructors are in lower case
+open Fl;
+open Fl_Double_Window;
+open Fl_Window;
+open Fl_Input;
+open Fl_Button;
+open Fl_Toggle_Button;
+open Fl_Float_Input;
+open Fl_Int_Input;
+open Fl_Secret_Input;
+open Fl_Multiline_Input;
+open Fl_Light_Button;
+open Fl_Widget;
+
+var when_v = 0;
+var input:carray[fl_input] = array_alloc[fl_input](5);
+
+cproc input_cb(widget:fl_widget) {
+  val tb = cast[fl_toggle_button](widget);
+  var l = get_label(tb); 
+  val v = get_value(tb);
+  println$ "Callback for " + str(l) + "'" + str(v) + "'";
+}
+
+proc toggle_cb(widget:fl_widget) { 
+  val inp = cast[fl_toggle_button](widget);
+  val x = get_value[fl_toggle_button](inp);
+  val v = fl_when_to_int(get_when(widget));
+  when_v = if (x > 0) then when_v \| int(v) else when_v \& int(~v) ;
+  for var i in 0 upto 4 do 
+     when(get(input,i),cast[uchar](when_v)); // Why is :: necessary
+  done
+  var ev = Fl::event_inside(widget);
+  var lbl = get_label(widget);
+  println$ "Toggle:" lbl+ " Event Inside:"+ str(ev)+ " Event " + event()+" When: "+v; 
+}
+cproc window_cb(widget:fl_widget) {
+  println$ "window callback called";
+  val w:fl_window = C_hack::cast[fl_window](widget);
+  hide(w);
+}
+
+//$ Set up 
+val width =  400;
+Fl::get_system_colors();
+val window = fl_double_window(width,350,"");
+var y = 10;
+set(input,0,fl_input(70,y,300,30,"Normal:")); y += 35;
+tooltip(get(input,0),"Normal input field");
+cursor_color(get(input,0),FL_SELECTION_COLOR);
+maximum_size(get(input,0),20);
+set(input,1,cast[fl_input](fl_float_input(70,y,300,30,"Float:"))); y += 35;
+tooltip(get(input,1),"Input field for floating-point number (F1)");
+shortcut(get(input,1),FL_F+1);
+set(input,2,cast[fl_input](fl_int_input(70,y,300,30,"Int:"))); y += 35;
+tooltip(get(input,2),"Input field for integer number (F2)");
+shortcut(get(input,2),FL_F+2);
+set(input,3,cast[fl_input](fl_secret_input(70,y,300,30,"&Secret:"))); y += 35;
+tooltip(get(input,3),"Input field for password (Alt-S)");
+set(input,4,cast[fl_input](fl_multiline_input(70,y,300,100,"&Multiline:"))); y += 105;
+tooltip(get(input,4),"Input field for short text with newlines (Alt-M)");
+wrap(get(input,4),1);
+var b1 = fl_toggle_button(10,y,200,25,"FL_WHEN_CHANGED");y+= 25;  
+tooltip(b1,"Do callback each time the text changes");
+var b2 = fl_toggle_button(10,y,200,25,"FL_WHEN_RELEASE");y+= 25;
+tooltip(b2,"Do callback when widget loses focus");
+var b3 = fl_toggle_button(10,y,200,25,"FL_WHEN_ENTER_KEY");y+= 25;
+tooltip(b3,"Do callback when user hits Enter key");
+
+//$ Set callbacks
+set_callback(window,window_cb);
+//$ callbacks for input fields 
+for var i in 0 upto 3 do
+  val w = get(input,i);
+  when(w,uchar(0)); 
+  set_callback(get(input,i),input_cb); 
+done
+//$ Callback for buttons
+set_callback(b1,cast[Fl_Callback](fl_callback_cb),toggle_cb); 
+set_callback(b2,cast[Fl_Callback](fl_callback_cb),toggle_cb); 
+set_callback(b3,cast[Fl_Callback](fl_callback_cb),toggle_cb); 
+//$ Close form and display
+end(window);
+show(window);
+run(); 

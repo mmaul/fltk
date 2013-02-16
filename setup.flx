@@ -1,0 +1,105 @@
+include "PKGTOOL/pkgtool";
+// Package parameters
+NAME = 'fltk';
+VERSION = '.02';
+AUTHOR = 'Mike Maul';
+AUTHOR_URL="";
+PKG_URL = 'http://felix-lang.org';
+DESCRIPTION = 'FLTK 1.X bindings';
+LONG_DESCRIPTION = """
+Binding for cross-platform GUI tool FLTK 1.X (http://www.fltk.org)
+""";
+CATEGORY=list("GUI");
+LIBDIR = "FLTK";
+
+open PackageInstaller;
+instance PackageInstaller {
+
+  proc build () {
+    task("Determining fltk configuration");
+    var fltk_config_err = "Unable to execute fltk-config. Make fltk-config is in your path and is functional. See setup.log for details.";
+    var includes = run_cmd("fltk-config --includedir",fltk_config_err);    
+    var ldflags = run_cmd("fltk-config --use-images --ldflags",fltk_config_err);
+    var ldstaticflags = run_cmd("fltk-config --ldstaticflags",fltk_config_err);
+    task("Creating config/fltk.fpc");
+    var fltk_fpc:ofile = fopen_output(Filename::join("config")"fltk.fpc");
+    if valid(fltk_fpc) do
+      var fltk_fpc_s:string = q"""
+cflags: -I$(includes)
+provides_dlib: $(ldflags)
+provides_slib: $(ldstaticflags)
+includes: <FL/Fl.H>
+includes: <FL/Fl_Window.H>
+includes: <FL/Fl_Group.H>
+includes: <FL/Fl_Double_Window.H>
+includes: <FL/Fl_Box.H>
+includes: <FL/Fl_Button.H>
+includes: <FL/Fl_Return_Button.H>
+includes: <FL/Fl_Repeat_Button.H>
+includes: <FL/Fl_Light_Button.H>
+includes: <FL/Fl_Round_Button.H>
+includes: <FL/Fl_Radio_Button.H>
+includes: <FL/Fl_Radio_Light_Button.H>
+includes: <FL/Fl_Radio_Round_Button.H>
+includes: <FL/Fl_Check_Button.H>
+includes: <FL/Fl_Toggle_Button.H>
+includes: <FL/Fl_Tooltip.H>
+includes: <FL/Fl_Input.H>
+includes: <FL/Fl_Menu_Bar.H>
+includes: <FL/Fl_Menu_Button.H>
+includes: <FL/Fl_Choice.H>
+includes: <FL/Fl_Float_Input.H>
+includes: <FL/Fl_Input_.H>
+includes: <FL/Fl_Input.H>
+includes: <FL/Fl_Int_Input.H>
+includes: <FL/Fl_Secret_Input.H>
+includes: <FL/Fl_Multiline_Input.H>
+includes: <FL/Fl_Color_Chooser.H>
+includes: <FL/Fl_Help_Dialog.H>
+includes: <FL/Fl_File_Chooser.H>
+includes: <FL/Fl_File_Icon.H>
+includes: <FL/Fl_Shared_Image.H>
+includes: <FL/Fl_PNM_Image.H>
+includes: <FL/Fl_Text_Buffer.H>
+includes: <FL/Fl_Text_Display.H>
+includes: <FL/Fl_Text_Editor.H>
+includes: <FL/Fl_Native_File_Chooser.H>
+includes: <FL/fl_ask.H>
+includes: <FL/math.h>
+includes: <FL/Fl_Valuator.H>
+includes: <FL/Fl_Slider.H>
+includes: <FL/Fl_Hor_Slider.H>
+includes: <FL/fl_draw.H>
+""";
+      write (fltk_fpc,fltk_fpc_s);
+      fclose(fltk_fpc);
+    else
+      red("Failed creating fltk.fpc");endl;System::exit(-1);
+    done
+    run_test("C01-fltk.flx",true);
+    task("Determining fltk_gl configuration");
+    var gl_includes = run_cmd("fltk-config --use-gl --includedir",fltk_config_err);
+    var gl_ldflags = run_cmd("fltk-config --use-gl --ldflags",fltk_config_err);
+    var gl_ldstaticflags = run_cmd("fltk-config --use-gl --ldstaticflags",fltk_config_err);
+    task("Creating config/fltk_gl.fpc");
+    var fltk_gl_fpc:ofile = fopen_output(Filename::join("config","fltk_gl.fpc"));
+    if valid(fltk_gl_fpc) do
+      var fltk_gl_fpc_s:string = q"""
+cflags: -I$(gl_includes)
+provides_dlib: $(gl_ldflags)
+provides_slib: $(gl_ldstaticflags)
+includes: <FL/Fl_Gl_Window.H>
+includes: <FL/gl.h>
+""";
+      write (fltk_gl_fpc,fltk_gl_fpc_s);
+      fclose(fltk_gl_fpc);
+    else
+      red("Failed creating fltk_gl.fpc");endl;System::exit(-1);
+    done 
+    run_test("C02-fltk_gl",true);
+  }
+
+}
+
+
+SetupTool::run();

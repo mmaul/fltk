@@ -1,0 +1,282 @@
+include "GL/glut_lib";
+include "GL/gl_lib";
+include "FLTK/fltk_enumerations";
+include "FLTK/fltk";
+open C_hack;
+requires package "fltk_gl";
+requires wtf;
+header fl_gl = """
+
+class Fl_Gl_Window_Proxy :public Fl_Gl_Window {
+
+  Fl_Callback_Proxy2 *draw_proxy_callback;
+  void *draw_proxy_callback_data;
+  Fl_Callback_Proxy2 *draw_overlay_proxy_callback;
+  void *draw_overlay_proxy_callback_data;
+  void *draw_overlay_proxy_callback_id;
+  Fl_Callback_Proxy3 *handle_proxy_callback;
+  void *handle_proxy_callback_data;
+  void *handle_proxy_callback_id;
+  void *draw_proxy_callback_id;
+  void init_proxy() {
+    draw_proxy_callback = NULL;
+    draw_proxy_callback_data = NULL;
+    draw_overlay_proxy_callback = NULL;
+    draw_overlay_proxy_callback_data = NULL;
+    handle_proxy_callback = NULL;
+    handle_proxy_callback_data = NULL;
+    draw_proxy_callback_id = 0;
+  }
+  public:
+
+  Fl_Gl_Window_Proxy(int W, int H, const char *l=0): Fl_Gl_Window(W,H,l) { init_proxy();}
+  Fl_Gl_Window_Proxy(int X, int Y, int W, int H, const char *l=0): Fl_Gl_Window(X,Y,W,H,l) { init_proxy();
+ }
+  ~Fl_Gl_Window_Proxy() { }
+
+  void set_draw_callback(Fl_Callback_Proxy2 cb,void * client_data,void *id) {
+    draw_proxy_callback = cb;
+    draw_proxy_callback_data = client_data;
+    draw_proxy_callback_id = id;
+  }
+
+  void draw() {
+    if(draw_proxy_callback_data) {
+      draw_proxy_callback(draw_proxy_callback_id, draw_proxy_callback_data);
+    }
+  }
+
+  void set_draw_overlay_callback(Fl_Callback_Proxy2 cb,void * client_data,void *id) {
+    draw_overlay_proxy_callback = cb;
+    draw_overlay_proxy_callback_data = client_data;
+    draw_overlay_proxy_callback_id = id;
+  }
+
+  void draw_overlay() {
+    if(draw_overlay_proxy_callback_data) {
+      draw_overlay_proxy_callback(draw_overlay_proxy_callback_id, draw_overlay_proxy_callback_data);
+    }
+  }
+
+  void set_handle_callback(Fl_Callback_Proxy3 cb, void *client_data,void *id) {
+    handle_proxy_callback = cb;
+    handle_proxy_callback_data = client_data;
+    handle_proxy_callback_id = id;
+  }
+  int handle(int e) {
+    if(handle_proxy_callback_data) {
+         int c = handle_proxy_callback(handle_proxy_callback_id,e,handle_proxy_callback_data);
+	 return Fl_Gl_Window::handle(c);
+    } else {
+      return Fl_Gl_Window::handle(e);
+    }
+  }
+
+};
+
+""";
+//type fl_gl_window_proxy = "Fl_Gl_Window_Proxy *" requires fl_gl;
+ 
+
+class Fl_Gl_Window [T in Fl_Gl_Windows] {
+  
+  inherit Fl_Group[fl_gl_window];  
+  inherit Fl_Window_[fl_gl_window];
+  inherit Fl_Widget_[fl_gl_window];
+//  proc show : T ="$1->show();";
+//  proc show : T*int*carray[char]  = "$1->show($2,$3);";
+  proc flush: T = "$1->flush();";
+//  proc hide: T = "$1->hide();";
+  proc resize: T*int*int*int*int = "$1->resize($2,$3,$4,$5);";
+  fun handle: T*int->int = "$1->handle($2)";
+    
+  /**
+    Is turned off when FLTK creates a new context for this window or 
+    when the window resizes, and is turned on \e after draw() is called.
+    You can use this inside your draw() method to avoid unnecessarily
+    initializing the OpenGL context. Just do this:
+    \code
+    void mywindow::draw() {
+     if (!valid()) {
+       glViewport(0,0,w(),h());
+       glFrustum(...);
+       ...other initialization...
+     }
+     if (!context_valid()) {
+       ...load textures, etc. ...
+     }
+     ... draw your geometry here ...
+    }
+    \endcode
+    
+    You can turn valid() on by calling valid(1).  You
+    should only do this after fixing the transformation inside a draw()
+    or after make_current().  This is done automatically after 
+    draw() returns.
+  */
+  fun get_valid: T->tiny = "$1->valid()";
+  
+  /**
+    See char Fl_Gl_Window::valid() const 
+  */
+  proc valid: T*tiny = "$1->valid($2);";
+  proc invalidate: T = "$1->invalidate();";
+
+  /**
+    Will only be set if the 
+    OpenGL context is created or recreated. It differs from
+    Fl_Gl_Window::valid() which is also set whenever the context
+    changes size.
+  */
+  fun get_context_valid: T->char = "$1->contect_valid()";
+
+  /**
+    See char Fl_Gl_Window::context_valid() const 
+  */
+  proc context_valid: T*char = "$1->context_valid($2);";
+
+  /**  Returns non-zero if the hardware supports the given or current OpenGL mode. */
+  fun can_do: int->int = "Fl_Gl_WIndow::can_do($1)";
+  /**  Returns non-zero if the hardware supports the given or current OpenGL mode. */
+//  static int can_do(const int *m) {return can_do(0, m);}
+  /**  Returns non-zero if the hardware supports the given or current OpenGL mode. */
+  fun can_do: 1->int = "Fl_Gl_Window::can_do()";
+  /**
+    Set or change the OpenGL capabilites of the window.  The value can be
+    any of the following OR'd together:
+
+    - \c FL_RGB - RGB color (not indexed)
+    - \c FL_RGB8 - RGB color with at least 8 bits of each color
+    - \c FL_INDEX - Indexed mode
+    - \c FL_SINGLE - not double buffered
+    - \c FL_DOUBLE - double buffered
+    - \c FL_ACCUM - accumulation buffer
+    - \c FL_ALPHA - alpha channel in color
+    - \c FL_DEPTH - depth buffer
+    - \c FL_STENCIL - stencil buffer
+    - \c FL_MULTISAMPLE - multisample antialiasing
+
+    FL_RGB and FL_SINGLE have a value of zero, so they
+    are "on" unless you give FL_INDEX or FL_DOUBLE.
+
+    If the desired combination cannot be done, FLTK will try turning off 
+    FL_MULTISAMPLE.  If this also fails the show() will call 
+    Fl::error() and not show the window.
+
+    You can change the mode while the window is displayed.  This is most
+    useful for turning double-buffering on and off.  Under X this will
+    cause the old X window to be destroyed and a new one to be created.  If
+    this is a top-level window this will unfortunately also cause the
+    window to blink, raise to the top, and be de-iconized, and the xid()
+    will change, possibly breaking other code.  It is best to make the GL
+    window a child of another window if you wish to do this!
+
+    mode() must not be called within draw() since it
+    changes the current context.
+  */
+  fun get_mode:T->fl_mode = "$1->mode()";
+  /** See Fl_Mode mode() const */
+  fun get_mode:T*int->fl_mode = "$1->mode($2)";
+
+  /** See Fl_Mode mode() const */
+  //int mode(const int *a) {return mode(0, a);}
+  /** void See void context(void* v, int destroy_flag) */
+  fun get_context: T->address ="$1->context()";
+  proc context: T*address*int = "$1->context($2,$3);";
+  proc make_current: T = "$1->make_current()";
+  proc swap_buffers: T = "$1->swap_buffers()";
+  proc ortho: T = "$1->ortho()";
+
+  /**
+    Returns true if the hardware overlay is possible.  If this is false,
+    FLTK will try to simulate the overlay, with significant loss of update
+    speed.  Calling this will cause FLTK to open the display.
+  */
+  fun can_do_overlay: T->int = "$1->can_do_overlay()";
+  /**
+    This method causes draw_overlay() to be called at a later time.
+    Initially the overlay is clear. If you want the window to display
+    something in the overlay when it first appears, you must call this
+    immediately after you show() your window.
+  */
+  proc redraw_overlay: T = "$1->redraw_overlay();";
+  proc hide_overlay: T = "$1->hide_overlay();";
+  /**
+    The make_overlay_current() method selects the OpenGL context
+    for the widget's overlay.  It is called automatically prior to the 
+    draw_overlay() method being called and can also be used to
+    implement feedback and/or selection within the handle()
+    method.
+  */
+  proc make_overlay_current: T = "$1->make_overlay_current();";
+
+  // Note: Doxygen docs in Fl_Widget.H to avoid redundancy.
+  //virtual Fl_Gl_Window* as_gl_window() {return this;}
+  
+  /**
+    Creates a new Fl_Gl_Window widget using the given size, and label string. 
+    The default boxtype is FL_NO_BOX. The default mode is FL_RGB|FL_DOUBLE|FL_DEPTH.
+  */
+  ctor fl_gl_window: int*int*string = "new Fl_Gl_Window($1,$2,const_cast<char *>(strdup($3.c_str())))";
+  ctor fl_gl_window: int*int = "new Fl_Gl_Window($1,$2)";
+  /**
+    Creates a new Fl_Gl_Window widget using the given position,
+    size, and label string. The default boxtype is FL_NO_BOX. The
+    default mode is FL_RGB|FL_DOUBLE|FL_DEPTH.
+  */
+  ctor fl_gl_window: int*int*int*int*string = "new Fl_Gl_Window($1,$2,$3,$4,const_cast<char *>(strdup($5.c_str())))";
+}
+
+class Fl_Gl_Window_Proxy  {
+  inherit Fl_Gl_Window[fl_gl_window_proxy];
+  inherit Fl_Widget_[fl_gl_window_proxy];  
+  inherit Fl_Group[fl_gl_window_proxy];
+//  inherit Fl_Group[fl_gl_window];  
+//  inherit Fl_Window_[fl_gl_window];
+
+  ctor fl_gl_window_proxy: 1 = "new Fl_Gl_Window_Proxy()" requires  fl_gl; 
+  ctor fl_gl_window_proxy: int*int*int*int*string = "new Fl_Gl_Window_Proxy($1,$2,$3,$4,const_cast<char *>(strdup($5.c_str())))" requires fl_gl; 
+  ctor fl_gl_window_proxy: int*int*int*int = "new Fl_Gl_Window_Proxy($1,$2,$3,$4)" requires fl_gl; 
+
+  proc set_draw_callback[T]:fl_gl_window_proxy*c_handler2_t*f_handler2_t*&T = "$1->set_draw_callback($2,$3,(void *)$4);" requires fl_gl;
+  proc set_draw_overlay_callback[T]:fl_gl_window_proxy*c_handler2_t*f_handler2_t*&T = "$1->set_draw_overlay_callback($2,$3,$4);"; requires fl_gl;
+  proc draw: fl_gl_window_proxy = "$1->draw();" requires fl_gl;
+  proc set_handle_callback[T]:fl_gl_window_proxy*c_handler3_t*f_handler3_t*&T = "$1->set_handle_callback($2,$3,$4);"; requires fl_gl;
+  fun handle: fl_gl_window_proxy*int->int = "$1->handle($2)" requires fl_gl;
+
+}
+
+//- FL/gl.h
+proc gl_color: fl_color = "gl_color($1);";
+proc gl_font: fl_font*int = "gl_font($1,$2);";
+proc gl_start: 1;
+proc gl_finish: 1;
+proc gl_rect: int*int*int*int;
+
+//$  Fills the given rectangle with the current color.
+//$  \see gl_rect(int x, int y, int w, int h)
+proc gl_rectf:int*int*int*int;
+
+fun gl_height: 1->int;
+fun gl_descent: 1->int;
+fun gl_width: string->double = "gl_width(const_cast<char *>(strdup($1.c_str())))";
+fun gl_width: string*int->double = "gl_width(const_cast<char *>(strdup($1.c_str())),$2)";
+fun gl_width: uchar->double = "gl_width($1)";
+
+proc gl_draw: string = "gl_draw(const_cast<char *>(strdup($1.c_str())));";
+proc gl_draw: string*int = "gl_draw(const_cast<char *>(strdup($1.c_str())),$2);";
+proc gl_draw: string*int*int = "gl_draw(const_cast<char *>(strdup($1.c_str())),$2,$3);";
+proc gl_draw: string*float*float = "gl_draw(const_cast<char *>(strdup($1.c_str())),$2,$3);";
+proc gl_draw: string*int*int*int*int*fl_align = "gl_draw(const_cast<char *>(strdup($1.c_str())),$2,$3,$4,$5,$6);";
+proc gl_measure: string*&int*&int = "gl_measure(const_cast<char *>(strdup($1.c_str())),$2,$3);";
+
+//#ifdef __APPLE__
+//extern FL_EXPORT void gl_texture_pile_height(int max);
+//extern FL_EXPORT int gl_texture_pile_height();
+//#endif
+proc gl_draw_image: carray[uchar]*int*int*int*int*int*int;
+proc gl_draw_image: carray[uchar]*int*int*int*int*int;
+proc gl_draw_image: carray[uchar]*int*int*int*int;
+
+//- FL/gl_draw.H
+proc gl_remove_displaylist_fonts: 1;

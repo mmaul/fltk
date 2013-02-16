@@ -1,0 +1,170 @@
+//$ GL Overlay
+//$ More advanced demonstration of gl_lib and custon main loop
+//$ with the Open GL binding
+
+//$Load the necessary libs and pull in classes to environment
+include "SETUPTOOL/setuptool";
+open PackageInstaller;
+include "FLTK/fltk_gl";
+include "FLTK/fltk";
+include "GL/gl_lib";
+open GL_gl_h;
+open Fl;
+open Fl_Window;
+open Fl_Widget;
+open Fl_Button;
+open Fl_Box;
+open Fl_Radio_Light_Button;
+open Fl_Slider[fl_slider];
+open Fl_Gl_Window_Proxy;
+open Fl_Valuator;
+
+//$ Container for GL window and data
+struct cube_box {
+  window:fl_gl_window_proxy;
+  wire:int;
+  size:double;
+  speed:double;
+  lasttime:double;
+}
+ctor cube_box(win:fl_gl_window_proxy,wir:int,siz:double,spe:double) => 
+  cube_box(win,wir,siz,spe,0.0); 
+ctor cube_box(win:fl_gl_window_proxy) => cube_box(win,0,0.0,0.0,0.0);
+
+//$ Shape data
+var v0 = cast[&float](carray(varray(0.0f, 0.0f, 0.0f)));
+var v1 = cast[&float](carray(varray(1.0f, 0.0f, 0.0f)));
+var v2 = cast[&float](carray(varray(1.0f, 1.0f, 0.0f)));
+var v3 = cast[&float](carray(varray(0.0f, 1.0f, 0.0f)));
+var v4 = cast[&float](carray(varray(0.0f, 0.0f, 1.0f)));
+var v5 = cast[&float](carray(varray(1.0f, 0.0f, 1.0f)));
+var v6 = cast[&float](carray(varray(1.0f, 1.0f, 1.0f)));
+var v7 = cast[&float](carray(varray(0.0f, 1.0f, 1.0f)));
+
+//$ Shape renderer
+proc drawcube(wire:int) {
+  var dmode = if wire == 0 then GL_POLYGON else GL_LINE_LOOP endif;
+/* Draw a colored cube */
+  glBegin(dmode);
+  glColor3ub(0ut, 0ut, 255ut);
+  glVertex3fv(v0); glVertex3fv(v1); glVertex3fv(v2); glVertex3fv(v3);
+  glEnd();
+  glBegin(dmode);
+  glColor3ub(0ut, 255ut, 255ut); 
+  glVertex3fv(v4); glVertex3fv(v5); glVertex3fv(v6); glVertex3fv(v7);
+  glEnd();
+  glBegin(dmode);
+  glColor3ub(255ut, 0ut, 255ut); 
+  glVertex3fv(v0); glVertex3fv(v1); glVertex3fv(v5); glVertex3fv(v4);
+  glEnd();
+  glBegin(dmode);
+  glColor3ub(255ut, 255ut, 0ut); 
+  glVertex3fv(v2); glVertex3fv(v3); glVertex3fv(v7); glVertex3fv(v6);
+  glEnd();
+  glBegin(dmode);
+  glColor3ub(0ut, 255ut, 0ut); 
+  glVertex3fv(v0); glVertex3fv(v4); glVertex3fv(v7); glVertex3fv(v3);
+  glEnd();
+  glBegin(dmode);
+  glColor3ub(255ut, 0ut, 0ut); 
+  glVertex3fv(v1); glVertex3fv(v2); glVertex3fv(v6); glVertex3fv(v5);
+  glEnd();
+}
+
+//$ Callbacks
+
+//$ draw implementation
+proc draw(my_ptr:address) {
+  var box = *cast[&cube_box](my_ptr);
+  // updates to box appear not to persist beyond each invocation
+  // of draw. Apparently because my_ptr argment is declared as
+  // const & in draw::call signature in generated C++ code 
+  box.lasttime = box.lasttime + box.speed;
+  if not get_valid(box.window) == 0t do
+    glLoadIdentity();
+    glViewport(0,0,w(box.window), h(box.window));
+    glEnable(GL_DEPTH_TEST);
+    glFrustum(-1.0, 1.0, -1.0, 1.0, 2.0, 10000.0);
+    glTranslatef(0.0f, 0.0f, -10.0f);
+    gl_font(FL_HELVETICA_BOLD, 16 );
+  done
+  glClear(GL_COLOR_BUFFER_BIT \| GL_DEPTH_BUFFER_BIT);
+  glPushMatrix();
+  glRotatef(float(box.lasttime*1.6), 0.0f, 0.0f, 1.0f);
+  glRotatef(float(box.lasttime*4.2), 1.0f, 0.0f, 0.0f);
+  glRotatef(float(box.lasttime*2.3), 0.0f, 1.0f, 0.0f);
+  glTranslatef(-1.0f, 1.2f, -1.5f);
+  glScalef(float(box.size),float(box.size),float(box.size));
+  drawcube(box.wire);
+  glPopMatrix();
+  gl_color(FL_GRAY);
+  glDisable(GL_DEPTH_TEST);
+  if (not get_valid(box.window) == 0t) do
+    gl_draw(if not box.wire == 0 then "Cube: wire" else "Cube: flat" endif, -4.5f, -4.5f );
+  done
+  glEnable(GL_DEPTH_TEST);
+}
+//$ Event handler
+fun handle(my_ptr:address, e:int) = {
+  var box = *cast[&cube_box](my_ptr);
+  match e with
+  |_ when to_int(FL_ENTER) == e => {cursor(cast[fl_window](box.window),FL_CURSOR_CROSS);}
+  |_ when to_int(FL_LEAVE) == e => {cursor(cast[fl_window](box.window),FL_CURSOR_DEFAULT);}
+  |_  => {}
+  endmatch;
+  return e; 
+}
+
+//$ Construct 
+var name = "cube";
+var form = fl_window(510 + 390, 390, name);
+ignore(fl_box(FL_DOWN_FRAME, 20, 20, 350, 350, ""));
+ignore(fl_box(FL_DOWN_FRAME, 510, 20, 350, 350, ""));
+var speed = fl_slider(FL_VERT_SLIDER, 390, 90, 40, 220, "Speed");
+var sz = fl_slider(FL_VERT_SLIDER,450, 90, 40, 220, "Size") ;
+var wire = fl_radio_light_button(390, 20, 100, 30, "Wire");
+var flat = fl_radio_light_button(390, 50, 100, 30, "Flat");
+var cube = cube_box(fl_gl_window_proxy(23, 23, 344, 344, ""));
+var cube2 = cube_box(fl_gl_window_proxy(513,23,344,344, ""));
+var resizer = fl_box(FL_NO_BOX, x(cube.window), y(sz), w(cube.window), h(sz));
+resizable(form,resizer);
+hide(resizer);
+end(form);
+
+//$ Set up callbacks
+set_draw_callback[cube_box](cube.window, cast[c_handler2_t](fl_callback_proxy2), draw,&cube);
+set_handle_callback(cube.window, cast[c_handler3_t](fl_callback_proxy3), handle,&cube);
+set_draw_callback(cube2.window, cast[c_handler2_t](fl_callback_proxy2), draw,&cube2);
+set_handle_callback(cube2.window, cast[c_handler3_t](fl_callback_proxy3), handle,&cube2);
+
+//$ Initialize
+bounds(speed,4.0,0.0);
+val default_speed = 1.0;cube.speed = default_speed; cube2.speed = default_speed;
+ignore(value(speed,default_speed));
+bounds(sz, 4.0, 0.01);
+val default_size = 1.0;cube.size = default_size; cube2.size = default_size;
+ignore(value(sz,default_size));
+ignore(value(flat,1)); 
+cube.wire = 0; cube2.wire = 1;
+label(form,"cube");
+
+//$ Display
+show(form,System::argc, System::_argv);
+show(cube.window);
+show(cube2.window);
+
+//$ Main loop
+if ((visible(form) > 0u and value(speed) > 0.0) and not Fl::check() == 0) 
+      or not Fl::wait() == 0 do
+    cube.wire = int(get_value(wire) == 0);
+    cube2.wire = int(not get_value(wire) == 0);
+    cube.size = value(sz); cube2.size = cube.size;
+    cube.speed = value(speed); cube2.speed = cube.speed;
+    cube.lasttime = cube.lasttime + cube.speed;
+    cube2.lasttime = cube2.lasttime + cube2.speed;
+    redraw(cube.window);
+    redraw(cube2.window);
+done
+quit:> 
+
+assert_equal(true,"Testing Gl functions");

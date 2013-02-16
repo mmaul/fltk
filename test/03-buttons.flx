@@ -1,0 +1,33 @@
+//$ Buttons Example
+include "SETUPTOOL/setuptool";
+open PackageInstaller;
+requires package "fltk";
+include "FLTK/fltk";
+open Fl;
+open Fl_Window;
+open Fl_Widget;
+open Fl_Button;
+open Fl_Check_Button;
+open Fl_Light_Button;
+open Fl_Repeat_Button;
+open Fl_Return_Button;
+open Fl_Round_Button;
+
+
+val window = fl_window(320,130,"Buttons");
+Fl_Tooltip::textcolor(FL_DARK_GREEN);
+val b1 = fl_button(10,10,130,30, "Button");
+tooltip(b1,"This is a Tooltip.");
+val b2 = fl_light_button(150,10,160,30, "Light Button");
+val b3 = fl_repeat_button(10,50,130,30, "Repeat Button");
+val b4 = fl_round_button(150,50,160,30, "Round Button");
+val b5 = fl_check_button(150,90,160,30, "Check Button");
+show(window);
+end(window);
+assert_equal(true,"Testing Fl_Widget::tooltip");
+assert_equal(get_value(b2) == 0,"Testing Fl_Light_Button");
+assert_equal(get_value(b3) == 0,"Testing Fl_Repeat_Button");
+assert_equal(get_value(b4) == 0,"Testing Fl_Round_Button");
+assert_equal(get_value(b5) == 0,"Testing Fl_Check_Button");
+
+

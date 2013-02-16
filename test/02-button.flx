@@ -1,0 +1,29 @@
+//$ Button Example
+include "SETUPTOOL/setuptool";
+open PackageInstaller;
+include "FLTK/fltk";
+open Fl;
+open Fl_Double_Window;
+open Fl_Widget;
+open Fl_Button;
+
+cproc clickcb(widget:fl_widget, data:address) {
+  println$ "Click:";
+}
+
+cproc clackcb(widget:fl_widget, data:address) {
+  println$ "Clack";
+}
+val window = fl_double_window(340,180,"Hi"); 
+val m1 = "&Click";
+val b1 = fl_button(20,20,80,25, m1);
+set_callback(b1,clickcb,NULL);
+val m2 = "C&lack";
+val b2 =  fl_button(120,20,80,25, m2);
+set_callback(b2,clackcb,NULL);
+show(window);
+end(window);
+assert_equal(get_value(b1) == 0,"Testing Fl_Button");
+
+
+

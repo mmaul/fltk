@@ -1,0 +1,22 @@
+include "SETUPTOOL/setuptool";
+open PackageInstaller;
+include "FLTK/fltk";
+open Fl;
+open Fl_Double_Window;
+open Fl_Widget;
+open Fl_Box;
+ 
+val window = fl_double_window(340,180,"Hi");
+val box1 = fl_box(20,40,300,100,"Hello WOrld!");
+box(box1,FL_UP_BOX);
+label(box1,"I said Hello");
+labelsize(box1,36);
+labelfont(box1,FL_COURIER_BOLD_ITALIC);
+labelcolor(box1,fl_darker(FL_BLUE));
+labeltype(box1,FL_SHADOW_LABEL);
+color(window,FL_RED,FL_RED);
+show(window);
+end(window);
+assert_equal(get_labeltype(box1) == FL_SHADOW_LABEL,"Testing Fl_Widget");
+assert_equal(contains(window,box1) == 1,"Testing Fl_Double_Window");
+

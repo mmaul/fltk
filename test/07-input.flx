@@ -1,8 +1,8 @@
 //$ input.flx
 //$ Demonstrates text input widgets
 //$ WHen event qualifier
-include "SETUPTOOL/setuptool";
-open PackageInstaller;
+include "PKGTOOL/pkgtool";
+open PkgTool;
 
 include "FLTK/fltk";
 open Bits;

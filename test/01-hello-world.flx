@@ -1,5 +1,5 @@
-include "SETUPTOOL/setuptool";
-open PackageInstaller;
+include "PKGTOOL/pkgtool";
+open PkgTool;
 include "FLTK/fltk";
 open Fl;
 open Fl_Double_Window;

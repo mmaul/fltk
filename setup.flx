@@ -1,19 +1,7 @@
 include "PKGTOOL/pkgtool";
-// Package parameters
-NAME = 'fltk';
-VERSION = '.02';
-AUTHOR = 'Mike Maul';
-AUTHOR_URL="";
-PKG_URL = 'http://felix-lang.org';
-DESCRIPTION = 'FLTK 1.X bindings';
-LONG_DESCRIPTION = """
-Binding for cross-platform GUI tool FLTK 1.X (http://www.fltk.org)
-""";
-CATEGORY=list("GUI");
-LIBDIR = "FLTK";
-
-open PackageInstaller;
-instance PackageInstaller {
+ 
+open PkgTool;
+instance PkgTool {
 
   proc build () {
     task("Determining fltk configuration");

@@ -1,6 +1,6 @@
 //$ Buttons Example
-include "SETUPTOOL/setuptool";
-open PackageInstaller;
+include "PKGTOOL/pkgtool";
+open PkgTool;
 requires package "fltk";
 include "FLTK/fltk";
 open Fl;

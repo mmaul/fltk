@@ -1,5 +1,5 @@
-include "SETUPTOOL/setuptool";
-open PackageInstaller;
+include "PKGTOOL/pkgtool";
+open PkgTool;
 requires package "fltk";
 const FL_MAJOR_VERSION:int requires header '#include <FL/Enumerations.H>';
 assert_equal(FL_MAJOR_VERSION == 1, "Checking fltk functionality", """

@@ -17,6 +17,6 @@ labeltype(box1,FL_SHADOW_LABEL);
 color(window,FL_RED,FL_RED);
 show(window);
 end(window);
-assert_equal(get_labeltype(box1) == FL_SHADOW_LABEL,"Testing Fl_Widget");
-assert_equal(contains(window,box1) == 1,"Testing Fl_Double_Window");
+assert_true(get_labeltype(box1) == FL_SHADOW_LABEL,"Testing Fl_Widget");
+assert_true(contains(window,box1) == 1,"Testing Fl_Double_Window");
 

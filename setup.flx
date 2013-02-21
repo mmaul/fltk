@@ -1,6 +1,7 @@
 include "PKGTOOL/pkgtool";
  
 open PkgTool;
+open Filename;
 instance PkgTool {
 
   proc build () {
@@ -10,7 +11,7 @@ instance PkgTool {
     var ldflags = run_cmd("fltk-config --use-images --ldflags",fltk_config_err);
     var ldstaticflags = run_cmd("fltk-config --ldstaticflags",fltk_config_err);
     task("Creating config/fltk.fpc");
-    var fltk_fpc:ofile = fopen_output(Filename::join("config")"fltk.fpc");
+    var fltk_fpc:ofile = fopen_output((BUILD_DIR.join("config")).join("fltk.fpc"));
     if valid(fltk_fpc) do
       var fltk_fpc_s:string = q"""
 cflags: -I$(includes)
@@ -70,7 +71,7 @@ includes: <FL/fl_draw.H>
     var gl_ldflags = run_cmd("fltk-config --use-gl --ldflags",fltk_config_err);
     var gl_ldstaticflags = run_cmd("fltk-config --use-gl --ldstaticflags",fltk_config_err);
     task("Creating config/fltk_gl.fpc");
-    var fltk_gl_fpc:ofile = fopen_output(Filename::join("config","fltk_gl.fpc"));
+    var fltk_gl_fpc:ofile = fopen_output((BUILD_DIR.join("config")).join("fltk_gl.fpc"));
     if valid(fltk_gl_fpc) do
       var fltk_gl_fpc_s:string = q"""
 cflags: -I$(gl_includes)

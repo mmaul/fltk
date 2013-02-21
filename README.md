@@ -6,7 +6,7 @@ AUTHOR: Mike Maul
 
 AUTHOR_EMAIL mike d0t maul [at] gmail <.> com
 
-PKG_URL: http://felix-lang.org
+PKG_URL: https://github.com/mmaul/fltk
 
 DESCRIPTION = FLTK 1.X bindings
 
@@ -20,14 +20,14 @@ Binding for cross-platform GUI tool FLTK 1.X (http://www.fltk.org)
 ## Quickstart Installation ##
 * 'install' must be able to write to Felix INSTALL_ROOT
 ...
-flx_pkg install fltk 
+scoop install fltk 
 ...
 
 ## Semi-automated Installation ##
 The log way... This will place the packge in your current working directory.
 Where you can isue the build, test, install or force commands to setup.
 ...
-flx_pkg get fltk
+scoop get fltk
 flx setup build
 flx setup test
 flx setup install

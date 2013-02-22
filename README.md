@@ -50,6 +50,7 @@ directory with out having to install the package. You must run this first:
     flx setup build
 
 And if you haven't installed fltk then you will need to set the PKG_CONFIG_PATH environmental variable to the current directory.
+
     For Unix and OSX
       PKG_CONFIG_PATH=./config; export PKG_CONFIG_PATH
       

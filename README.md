@@ -19,6 +19,7 @@ Binding for cross-platform GUI tool FLTK 1.X (http://www.fltk.org)
 
 ## Quickstart Installation ##
 * 'install' must be able to write to Felix INSTALL_ROOT
+
     scoop install fltk 
 
 ## Semi-automated Installation ##

@@ -49,6 +49,17 @@ directory with out having to install the package. You must run this first:
 
     flx setup build
 
+And if you haven't installed fltk then you will need to set the PKG_CONFIG_PATH environmental variable to the current directory.
+    For Unix and OSX
+      PKG_CONFIG_PATH=./config; export PKG_CONFIG_PATH
+      
+    For Windows
+      set PKG_CONFIG_PATH=.\config
+
 You can find the examples directory in your Felix INSTALL_ROOT_TOPDIR/example/fltk if you have installed the package or if you have not simply in the package directory. For example
 
     flx examples/hello_world
+
+Documentation
+=============
+Refer to the embeded documentaion in the library files.

@@ -86,6 +86,8 @@ includes: <FL/gl.h>
       red("Failed creating fltk_gl.fpc");endl;System::exit(-1);
     done 
     run_test("C02-fltk_gl",true);
+
+    default_build();
   }
 
 }

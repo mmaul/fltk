@@ -38,7 +38,7 @@ proc toggle_cb(widget:fl_widget) {
   val v = fl_when_to_int(get_when(widget));
   when_v = if (x > 0) then when_v \| int(v) else when_v \& int(~v) ;
   for var i in 0 upto 4 do 
-     when(get(input,i),cast[uchar](when_v)); // Why is :: necessary
+     when(get(input,i),cast[utiny](when_v)); // Why is :: necessary
   done
   var ev = Fl::event_inside(widget);
   var lbl = get_label(widget);
@@ -82,7 +82,7 @@ set_callback(window,window_cb);
 //$ callbacks for input fields 
 for var i in 0 upto 3 do
   val w = get(input,i);
-  when(w,uchar(0)); 
+  when(w,utiny(0)); 
   set_callback(get(input,i),input_cb); 
 done
 //$ Callback for buttons

@@ -92,4 +92,4 @@ set_callback(b3,cast[Fl_Callback](fl_callback_cb),toggle_cb);
 //$ Close form and display
 end(window);
 show(window);
-assert_equal(true,"Testing FL_Input");
+assert_true(true,"Testing FL_Input");

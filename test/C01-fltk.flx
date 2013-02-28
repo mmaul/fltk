@@ -2,7 +2,7 @@ include "PKGTOOL/pkgtool";
 open PkgTool;
 requires package "fltk";
 const FL_MAJOR_VERSION:int requires header '#include <FL/Enumerations.H>';
-assert_equal(FL_MAJOR_VERSION == 1, "Checking fltk functionality", """
+assert_true(FL_MAJOR_VERSION == 1, "Checking fltk functionality", """
   Unable to find FLTK.
     Make usre FLTK 1.X is installed. If it is installed tell
     setup where the header and library files are at with the -I and -L switches. """);

@@ -167,4 +167,4 @@ if ((visible(form) > 0u and value(speed) > 0.0) and not Fl::check() == 0)
 done
 quit:> 
 
-assert_equal(true,"Testing Gl functions");
+assert_true(true,"Testing Gl functions");

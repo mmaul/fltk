@@ -24,10 +24,10 @@ val b4 = fl_round_button(150,50,160,30, "Round Button");
 val b5 = fl_check_button(150,90,160,30, "Check Button");
 show(window);
 end(window);
-assert_equal(true,"Testing Fl_Widget::tooltip");
-assert_equal(get_value(b2) == 0,"Testing Fl_Light_Button");
-assert_equal(get_value(b3) == 0,"Testing Fl_Repeat_Button");
-assert_equal(get_value(b4) == 0,"Testing Fl_Round_Button");
-assert_equal(get_value(b5) == 0,"Testing Fl_Check_Button");
+assert_true(true,"Testing Fl_Widget::tooltip");
+assert_true(get_value(b2) == 0,"Testing Fl_Light_Button");
+assert_true(get_value(b3) == 0,"Testing Fl_Repeat_Button");
+assert_true(get_value(b4) == 0,"Testing Fl_Round_Button");
+assert_true(get_value(b5) == 0,"Testing Fl_Check_Button");
 
 

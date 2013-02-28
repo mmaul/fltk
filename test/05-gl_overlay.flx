@@ -145,6 +145,6 @@ show(window);
 //$ Bind and display the GL window
 end(cast[fl_window](sw.window));
 show(sw.window);
-assert_equal(true,"Testing Fl_Gl_Window");
+assert_true(true,"Testing Fl_Gl_Window");
 
 

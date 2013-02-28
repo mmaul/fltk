@@ -2,7 +2,7 @@ include "PKGTOOL/pkgtool";
 open PkgTool;
 requires package "fltk_gl";
 fun can_do: int->int = "Fl_Gl_Window::can_do($1)"; 
-assert_equal(can_do(-13) == 0, "Checking fltk_gl functionality", """
+assert_true(can_do(-13) == 0, "Checking fltk_gl functionality", """
   Unable to find compile and link against FLTK.
     Make usre FLTK 1.X is installed. """);
 

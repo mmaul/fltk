@@ -261,7 +261,7 @@ fun gl_height: 1->int;
 fun gl_descent: 1->int;
 fun gl_width: string->double = "gl_width(const_cast<char *>(strdup($1.c_str())))";
 fun gl_width: string*int->double = "gl_width(const_cast<char *>(strdup($1.c_str())),$2)";
-fun gl_width: uchar->double = "gl_width($1)";
+fun gl_width: utiny->double = "gl_width($1)";
 
 proc gl_draw: string = "gl_draw(const_cast<char *>(strdup($1.c_str())));";
 proc gl_draw: string*int = "gl_draw(const_cast<char *>(strdup($1.c_str())),$2);";
@@ -274,9 +274,9 @@ proc gl_measure: string*&int*&int = "gl_measure(const_cast<char *>(strdup($1.c_s
 //extern FL_EXPORT void gl_texture_pile_height(int max);
 //extern FL_EXPORT int gl_texture_pile_height();
 //#endif
-proc gl_draw_image: carray[uchar]*int*int*int*int*int*int;
-proc gl_draw_image: carray[uchar]*int*int*int*int*int;
-proc gl_draw_image: carray[uchar]*int*int*int*int;
+proc gl_draw_image: carray[utiny]*int*int*int*int*int*int;
+proc gl_draw_image: carray[utiny]*int*int*int*int*int;
+proc gl_draw_image: carray[utiny]*int*int*int*int;
 
 //- FL/gl_draw.H
 proc gl_remove_displaylist_fonts: 1;

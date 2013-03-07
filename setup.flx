@@ -85,8 +85,18 @@ includes: <FL/gl.h>
     else
       red("Failed creating fltk_gl.fpc");endl;System::exit(-1);
     done 
-    run_test("C02-fltk_gl",true);
-
+    run_test("C02-fltk_gl",true,true);
+    if HAS_TEST_FAILURES do
+      warning("Basic functionality testing indicates FLTK GL functionality may not work on your system."+NL+
+         "This may be due to your fltk installation or the installation of GL."+NL+
+         "If in doubt try running the cube and gl_overlay examples.");
+      var skip_gl_test_05:ofile = fopen_output((BUILD_DIR.join("test")).join("S05-gl_overlay"));
+      write(skip_gl_test_05,"SKIP\n");
+      fclose(skip_gl_test_05);
+      var skip_gl_test_06:ofile = fopen_output((BUILD_DIR.join("test")).join("S06-cube"));
+      write(skip_gl_test_06,"//SKIP\n");
+      fclose(skip_gl_test_06);
+     done
     default_build();
   }
 

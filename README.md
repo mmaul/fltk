@@ -1,6 +1,6 @@
 NAME: fltk
 
-VERSION: .02  
+VERSION: .021  
 
 AUTHOR: Mike Maul
 

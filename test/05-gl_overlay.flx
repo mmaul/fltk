@@ -3,7 +3,7 @@
 //$ with the Open GL binding. Demonstrates use of proxied FLTK classes
 //$ 
 //$Load the necessary libs and pull in classes to environment
-include "PKGTOOL/pkgtool";
+include "std/felix/pkgtool";
 open PkgTool;
 include "FLTK/fltk_gl";
 include "FLTK/fltk";

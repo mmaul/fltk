@@ -1,5 +1,5 @@
 //$ Buttons Example
-include "PKGTOOL/pkgtool";
+include "std/felix/pkgtool";
 open PkgTool;
 requires package "fltk";
 include "FLTK/fltk";

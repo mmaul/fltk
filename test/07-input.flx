@@ -1,7 +1,7 @@
 //$ input.flx
 //$ Demonstrates text input widgets
 //$ WHen event qualifier
-include "PKGTOOL/pkgtool";
+include "std/felix/pkgtool";
 open PkgTool;
 
 include "FLTK/fltk";

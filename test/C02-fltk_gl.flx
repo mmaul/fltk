@@ -1,4 +1,4 @@
-include "PKGTOOL/pkgtool";
+include "std/felix/pkgtool";
 open PkgTool;
 requires package "fltk_gl";
 fun can_do: int->int = "Fl_Gl_Window::can_do($1)"; 
